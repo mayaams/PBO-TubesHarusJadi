@@ -8,6 +8,8 @@ package controller;
 import controller.ControllerTambahBuku;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import javax.swing.table.DefaultTableModel;
 import model.Alat_tulis;
 import view.ViewBeranda;
 import view.ViewEditAlatTulis;
@@ -27,7 +29,8 @@ import view.ViewTambahBuku;
 public class ControllerTambahAlatTulis {
     private ViewTambahAlatTulis view;
     private Alat_tulis model;
-    
+    private Database db = new Database();
+     
     ControllerBeranda cb = new ControllerBeranda(new ViewBeranda());
     
     public ControllerTambahAlatTulis(ViewTambahAlatTulis view) {
@@ -113,6 +116,14 @@ public class ControllerTambahAlatTulis {
                 cb.toLogin();
             }
         });
+        
+        this.view.setTambahEvent(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btnTambahActionPerformed();
+                db.loadAlatTulis();
+            }
+        });
     }
     
     public void ShowView(){
@@ -168,4 +179,31 @@ public class ControllerTambahAlatTulis {
         this.view.dispose();
     }
     
+    public void btnTambahActionPerformed(){
+        db = new Database();
+        System.out.println("cekkk");
+        String nama = view.getTfNamaBarang();
+        String idBarang = view.getTfIdBarang();
+        int harga = view.getTfHarga();
+        int stok = view.getTfStok();
+        String detail = view.getTfDetail();
+        String namaRak = view.getTfNamaRak();
+        String idRak = view.getTfIdRak();
+        String kategori = view.getTfKategori(); 
+        String tingkat = view.getTfTingkat();
+        if (nama.isEmpty() || idBarang.isEmpty() || harga == 0 ||
+        stok == 0 || detail.isEmpty() || namaRak.isEmpty() ||
+        idRak.isEmpty() || kategori.isEmpty() || tingkat.isEmpty()){
+            view.showMessage("Tidak ada data", "Error", 0);
+        }else{
+            if (db.cekDuplikatIdBarang(idBarang)){
+                view.showMessage("Barang sudah ada", "Error", 0);
+           }else{
+        System.out.println("cek2");
+                db.addAlatTulis(new Alat_tulis(nama,idBarang,harga,stok,idRak,detail));
+                System.out.println("cek3");
+                view.reset();
+                view.showMessage("Data berhasil ditambahkan", "Success", 1);
+           }        }
+    }
 }
