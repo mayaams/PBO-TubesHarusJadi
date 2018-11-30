@@ -160,12 +160,36 @@ public class Database {
         query += ")";
         if (manipulate(query)) this.buku.add(buku);
         disconnect();
+        
+    }
+    
+    public void addAlatTulis(Alat_tulis alat){
+        connect();
+        String query = "INSERT INTO t_alat_tulis VALUES (";
+        query += "'" + alat.getIdBarang() + "',";
+        query += "'" + alat.getNamaBarang() + "',";
+        query += "'" + alat.getStok()+ "',";
+        query += "'" + alat.getHarga()+ "'";
+        query += "'" + alat.getIdGudang()+ "'";
+        query += "'" + alat.getDetail()+ "'";
+        query += ")";
+        if (manipulate(query)) this.alat_tulis.add(alat);
+        disconnect();
     }
     
     
-   
+    public boolean cekDuplikatIdBarang(String id){
+        boolean cek = false;
+        for (Barang b : barang) {
+            if (b.getIdBarang().equals(b)){
+                cek = true;
+                break;
+            }
+        }
+        return cek;
+    }
+ 
     
-
     public ArrayList<Gudang> getGudang() {
         return gudang;
     }
