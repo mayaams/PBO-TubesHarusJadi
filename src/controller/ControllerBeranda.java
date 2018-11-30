@@ -65,5 +65,5 @@ public class ControllerBeranda {
         this.view.setLocationRelativeTo(null);
         this.view.show();
     }
-    
+    //gjhgjjgjhjg
 }
