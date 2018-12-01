@@ -7,6 +7,7 @@ package controller;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import model.Alat_tulis;
 import model.Buku;
 import view.ViewBeranda;
 import view.ViewEditAlatTulis;
@@ -26,6 +27,7 @@ import view.ViewTambahBuku;
 public class ControllerTambahBuku {
     private ViewTambahBuku view;
     private Buku model;
+    private Database db = new Database();
 
     ControllerBeranda cb = new ControllerBeranda(new ViewBeranda());
     
@@ -117,6 +119,14 @@ public class ControllerTambahBuku {
                 cb.toLogin();
             }
         });
+                
+        this.view.setTambahEvent(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btnTambahActionPerformed();
+                db.loadBuku();
+            }
+        });
     }
     
     public void toAddAT(){
@@ -167,33 +177,33 @@ public class ControllerTambahBuku {
         this.view.dispose();
     }
     
-//    public void btnTambahBukuActionPerformed(){
-//        String nama = view.getName();
-//        int harga = view.getTfHarga();
-//        String idBarang = view.getTfIdBarang();
-//        String stok = view.getTfStok();
-//        String kategori = view.getTfKategori();
-//        String jumHalaman = view.getTfJumHlm();
-//        String ukuran = view.getTfUkuran();
-//        String penerbit = view.getTfPenerbit();
-//        String pengarang = view.getTfPengarang();
-//        String namaRak = view.getTfNamaRak();
-//        String idRak = view.getTfIdRak();
-//        String kategoriRak = view.getTfKategoriRak();
-//        String tingkatRak = view.getTfTingkat();
-//        //char jk = view.getJK();
-//        if (nama.isEmpty() || harga.isEmpty() || idBarang.isEmpty() || stok.isEmpty() || 
-//                kategori.isEmpty() || jumHalaman.isEmpty() || ukuran.isEmpty() || penerbit.isEmpty() ||
-//                pengarang.isEmpty() || namaRak.isEmpty() || idRak.isEmpty() || kategoriRak.isEmpty() || tingkatRak.isEmpty() ){
-//            view.showMessage("Data Kosong", "Error", 0);
-//        }else{
-//            if (db.cekDuplikatNIM(nim)){
-//                view.showMessage("NIM Sudah Ada", "Error", 0);
-//            }else{
-//                db.addBuku(new Buku(idBarang,nama,stok,harga,kategori,ukuran,jumHalaman, idRak,penerbit));
-//                view.reset();
-//                view.showMessage("Data Berhasil Ditambah", "Success", 1);
-//            }
-//        }
-//    }
+        public void btnTambahActionPerformed(){
+        db = new Database();
+        System.out.println("cekkk");
+        String idBarang = view.getTfIdBarang();
+        String nama = view.getTfJudul();
+        int harga = view.getTfHarga();
+        int stok = view.getTfStok();
+        String kategori = view.getTfKategori();
+        int jumHal = view.getTfJumHlm();
+        String ukuran = view.getTfUkuran();
+        String idGudang = view.getTfIdGudang();
+        String idRak = view.getTfIdRak();
+        String idPenerbit = view.getTfIdPenerbit();
+        String idPengarang = view.getTfIdPengarang();
+        if (idBarang.isEmpty() || nama.isEmpty() || harga == 0 ||
+        stok == 0 || kategori.isEmpty() || jumHal == 0 ||  
+        idGudang.isEmpty() || idRak.isEmpty() || idPenerbit.isEmpty() || idPengarang.isEmpty()){
+            view.showMessage("Tidak ada data", "Error", 0);
+        }else{
+            if (db.cekDuplikatIdBarang(idBarang)){
+                view.showMessage("Barang sudah ada", "Error", 0);
+           }else{
+                System.out.println("cek2");
+                db.addBuku(new Buku(idBarang, nama, stok, harga, idGudang,idRak,kategori,ukuran,jumHal,idPenerbit,idPengarang));
+                System.out.println("cek3");
+                view.reset();
+                view.showMessage("Data berhasil ditambahkan", "Success", 1);
+           }        }
+    }
 }
