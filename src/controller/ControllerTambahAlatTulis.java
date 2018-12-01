@@ -187,20 +187,18 @@ public class ControllerTambahAlatTulis {
         int harga = view.getTfHarga();
         int stok = view.getTfStok();
         String detail = view.getTfDetail();
-        String namaRak = view.getTfNamaRak();
+        String idGudang = view.getTfIdGudang();
         String idRak = view.getTfIdRak();
-        String kategori = view.getTfKategori(); 
-        String tingkat = view.getTfTingkat();
         if (nama.isEmpty() || idBarang.isEmpty() || harga == 0 ||
-        stok == 0 || detail.isEmpty() || namaRak.isEmpty() ||
-        idRak.isEmpty() || kategori.isEmpty() || tingkat.isEmpty()){
+        stok == 0 || detail.isEmpty() || idGudang.isEmpty() ||
+        idRak.isEmpty()){
             view.showMessage("Tidak ada data", "Error", 0);
         }else{
             if (db.cekDuplikatIdBarang(idBarang)){
                 view.showMessage("Barang sudah ada", "Error", 0);
            }else{
         System.out.println("cek2");
-                db.addAlatTulis(new Alat_tulis(nama,idBarang,harga,stok,idRak,detail));
+                db.addAlatTulis(new Alat_tulis(idBarang, nama, stok, harga, idGudang,idRak,detail));
                 System.out.println("cek3");
                 view.reset();
                 view.showMessage("Data berhasil ditambahkan", "Success", 1);
