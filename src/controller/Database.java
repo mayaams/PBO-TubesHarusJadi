@@ -5,6 +5,7 @@
  */
 package controller;
 
+import java.sql.DatabaseMetaData;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -38,11 +39,7 @@ public class Database {
     private ArrayList<Pengarang> pengarang = new ArrayList<>();
     private ArrayList<Petugas> petugas = new ArrayList<>();
     private ArrayList<Rak> rak = new ArrayList<>();
-    
-    public Database() {
-        
-    }
-    
+      
     public void connect(){
         try {
             String url = "jdbc:mysql://localhost/db_toko_buku";
@@ -50,6 +47,9 @@ public class Database {
             String pass = "";
             conn = DriverManager.getConnection(url, user, pass);
             stmt = conn.createStatement();
+            //gua tamabahin
+            DatabaseMetaData dmd = conn.getMetaData();
+            System.out.println("URL : "+dmd.getURL());
         } catch (SQLException ex) {
             Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -74,7 +74,20 @@ public class Database {
         }
         return cek;
     }
+    
+    public boolean cekDuplikatIdBarang(String id){
+        boolean cek = false;
+        for (Barang b : barang) {
+            if (b.getIdBarang().equals(id)){
+                cek = true;
+                break;
+            }
+        }
+        return cek;
+    }
+ 
 
+///penerbit//////////////////////////
     public ArrayList<Penerbit> getPenerbit() {
         return penerbit;
     }
@@ -93,6 +106,8 @@ public class Database {
         disconnect();
     }
 
+    
+    /////alat tulis//////////////
     public ArrayList<Alat_tulis> getAlat_tulis() {
         return alat_tulis;
     }
@@ -103,14 +118,53 @@ public class Database {
             String query = "SELECT * FROM t_alat_tulis NATURAL JOIN t_barang";
             rs = stmt.executeQuery(query);
             while (rs.next()){
-                alat_tulis.add(new Alat_tulis(rs.getString("id_barang"),rs.getString("nama_barang"),rs.getInt("stok"),rs.getInt("harga"),rs.getString("id_gudang"), rs.getString("detail")));
+                alat_tulis.add(new Alat_tulis(rs.getString("id_barang"),rs.getString("nama_barang"),rs.getInt("stok"),rs.getInt("harga"),rs.getString("id_gudang"),rs.getString("id_rak"), rs.getString("detail")));
             }
         } catch (SQLException ex) {
             Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
         }
         disconnect();
     }
-
+    
+    public void addAlatTulis(Alat_tulis alat){
+        connect();
+        String query = "INSERT INTO t_barang VALUES (";
+        query += "'" + alat.getIdBarang() + "',";
+        query += "'" + alat.getNamaBarang() + "',";
+        query += "'" + alat.getStok()+ "',";
+        query += "'" + alat.getHarga()+ "',";
+        query += "'" + alat.getIdGudang()+ "',";
+        query += "'" + alat.getIdRak() + "'";
+        query += ")";
+       
+        String query1 = "INSERT INTO t_alat_tulis VALUES (";
+        query1 += "'" + alat.getIdBarang() + "',";
+        query1 += "'" + alat.getDetail()+ "'";
+        query1 += ")";
+        
+        if (manipulate(query)){
+            alat_tulis.add(alat);
+        }
+        System.out.println("cek barang");
+        System.out.println("QUERY = "+ query);
+       
+        if (manipulate(query1)){
+            alat_tulis.add(alat);
+        }
+        System.out.println("cek alat tulis");
+        System.out.println("QUERY = "+ query1);
+        disconnect();
+    }
+    
+    public void cariAlatTulis(String id, String nama, String merk){
+        
+        
+        
+        
+    }
+    
+    
+    /// barang/////////////////
     public ArrayList<Barang> getBarang() {
         return barang;
     }
@@ -121,7 +175,7 @@ public class Database {
             String query = "SELECT * FROM t_barang";
             rs = stmt.executeQuery(query);
             while (rs.next()){
-                barang.add(new Barang(rs.getString("id_barang"), rs.getString("nama_barang"),rs.getInt("stok"),rs.getInt("harga"),rs.getString("id_gudang")));
+                barang.add(new Barang(rs.getString("id_barang"), rs.getString("nama_barang"),rs.getInt("stok"),rs.getInt("harga"),rs.getString("id_gudang"),rs.getString("id_rak")));
             }
         } catch (SQLException ex) {
             Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
@@ -129,6 +183,8 @@ public class Database {
         disconnect();
     }
 
+     
+    ///buku////////////
     public ArrayList<Buku> getBuku() {
         return buku;
     }
@@ -139,8 +195,8 @@ public class Database {
             String query = "SELECT * FROM t_buku NATURAL JOIN t_barang";
             rs = stmt.executeQuery(query);
             while (rs.next()){
-              buku.add(new Buku(rs.getString("id_barang"),rs.getString("nama_barang"),rs.getInt("stok"),rs.getInt("harga"),rs.getString("id_gudang"),rs.getString("kategori"),rs.getString("ukuran"),rs.getInt("jum_halaman"),rs.getString("id_rak"),rs.getString("id_penerbit")));
- //                 buku.add(new Buku(rs.getString("id_barang"),rs.getString(query)))
+              this.buku.add(new Buku(rs.getString("id_barang"),rs.getString("nama_barang"),rs.getInt("stok"),rs.getInt("harga"),rs.getString("id_gudang"),rs.getString("id_rak"),rs.getString("kategori"),rs.getString("ukuran"),rs.getInt("jum_halaman"),rs.getString("id_penerbit"),rs.getString("id_pengarang")));
+
             }
         } catch (SQLException ex) {
             Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
@@ -150,46 +206,42 @@ public class Database {
     
     public void addBuku(Buku buku) {
         connect();
-        String query = "INSERT INTO buku VALUES (";
+        String query = "INSERT INTO t_barang VALUES (";
         query += "'" + buku.getIdBarang() + "',";
-        query += "'" + buku.getKategori() + "',";
-        query += "'" + buku.getUkuran() + "',";
-        query += "'" + buku.getJumHalaman()+ "'";
-        query += "'" + buku.getIdRak()+ "'";
-        query += "'" + buku.getIdPenerbit()+ "'";
+        query += "'" + buku.getNamaBarang() + "',";
+        query += "'" + buku.getStok()+ "',";
+        query += "'" + buku.getHarga()+ "',";
+        query += "'" + buku.getIdGudang()+ "',";
+        query += "'" + buku.getIdRak() + "'";
         query += ")";
-        if (manipulate(query)) this.buku.add(buku);
+       
+        String query1 = "INSERT INTO t_buku VALUES (";
+        query1 += "'" + buku.getIdBarang() + "',";
+        query1 += "'" + buku.getKategori()+ "',";
+        query1 += "'" + buku.getUkuran() + "',";
+        query1 += "'" + buku.getJumHalaman()+ "',";
+        query1 += "'" + buku.getIdPenerbit() + "',";
+        query1 += "'" + buku.getIdPengarang() + "'";
+        query1 += ")";
+        
+        if (manipulate(query)){
+            this.buku.add(buku);
+        }
+        System.out.println("cek add barang");
+        System.out.println("QUERY = "+ query);
+       
+        if (manipulate(query1)){
+            this.buku.add(buku);
+        }
+        System.out.println("cek add buku");
+        System.out.println("QUERY = "+ query1);
         disconnect();
         
     }
     
-    public void addAlatTulis(Alat_tulis alat){
-        connect();
-        String query = "INSERT INTO t_alat_tulis VALUES (";
-        query += "'" + alat.getIdBarang() + "',";
-        query += "'" + alat.getNamaBarang() + "',";
-        query += "'" + alat.getStok()+ "',";
-        query += "'" + alat.getHarga()+ "'";
-        query += "'" + alat.getIdGudang()+ "'";
-        query += "'" + alat.getDetail()+ "'";
-        query += ")";
-        if (manipulate(query)) this.alat_tulis.add(alat);
-        disconnect();
-    }
+   
     
-    
-    public boolean cekDuplikatIdBarang(String id){
-        boolean cek = false;
-        for (Barang b : barang) {
-            if (b.getIdBarang().equals(b)){
-                cek = true;
-                break;
-            }
-        }
-        return cek;
-    }
- 
-    
+///gudang    
     public ArrayList<Gudang> getGudang() {
         return gudang;
     }
@@ -213,6 +265,9 @@ public class Database {
         return pengarang;
     }
     
+    
+    
+    ///pengarang////////////////////////////////////
     public void loadPengarang() {
         connect();
         try {
@@ -226,6 +281,8 @@ public class Database {
         }
         disconnect();
     }
+
+    ////petugas//////////////////////////////////////////////
 
     public ArrayList<Petugas> getPetugas() {
         return petugas;
@@ -245,6 +302,8 @@ public class Database {
         disconnect();
     }
     
+    
+    ////rak////////////////////////////////////////////////////////////
     public ArrayList<Rak> getRak() {
         return rak;
     }
@@ -262,9 +321,28 @@ public class Database {
         }
         disconnect();
     }
-    
-    
-    
-    
-    
+
+    public Connection getConn() {
+        return conn;
+    }
+
+    public void setConn(Connection conn) {
+        this.conn = conn;
+    }
+
+    public Statement getStmt() {
+        return stmt;
+    }
+
+    public void setStmt(Statement stmt) {
+        this.stmt = stmt;
+    }
+
+    public ResultSet getRs() {
+        return rs;
+    }
+
+    public void setRs(ResultSet rs) {
+        this.rs = rs;
+    }
 }
